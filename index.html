@@ -1,19 +1,19 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html>
+
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <!-- 替换UI组件：Tailwind + Font Awesome，移除w3.css -->
+    <meta content="text/html;charset=utf-8" http-equiv="content-type" />
+    <meta content="IE=edge" http-equiv="X-UA-Compatible" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!-- 移除w3.css，引入Tailwind和FontAwesome，不改动下面业务CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
 
-    <!-- 原有业务样式和第三方库，保持不变 -->
     <link rel="stylesheet" type="text/css" href="lib/joint.css" />
     <link href="lib/select2.min.css" rel="stylesheet" />
     <link rel="stylesheet" type="text/css" href="style.css" />
 
-    <!-- 原有JS依赖，顺序不能改动 -->
+    <!-- 原有JS依赖顺序完全不变 -->
     <script src="lib/jquery.min.js"></script>
     <script src="lib/lodash.min.js"></script>
     <script src="lib/backbone.js"></script>
@@ -23,153 +23,164 @@
     <script src="lib/select2.min.js"></script>
     <script src="LogicParser.js"></script>
 
-    <!-- Tailwind自定义主题（配色） -->
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
-                        primary: '#2563eb',
-                        success: '#10b981',
+                        success: '#22c55e',
+                        primary: '#3b82f6',
                         warning: '#f59e0b',
-                        info: '#06b6d4',
-                    },
-                    fontFamily: {
-                        sans: ['Inter', 'system-ui', 'sans-serif'],
-                    },
+                    }
                 }
             }
         }
     </script>
     <style type="text/tailwindcss">
         @layer utilities {
-            .content-auto {
-                content-visibility: auto;
+            .btn-green {
+                @apply bg-success text-white px-3 py-1.5 rounded hover:bg-success/80 transition inline-flex items-center gap-1;
             }
-            .panel-card {
-                @apply bg-white rounded-lg shadow p-3 border border-gray-200;
+            .btn-blue {
+                @apply bg-primary text-white px-3 py-1.5 rounded hover:bg-primary/80 transition inline-flex items-center gap-1;
             }
-            .btn-primary {
-                @apply bg-primary text-white px-3 py-2 rounded hover:bg-primary/80 transition-all flex items-center gap-1;
+            .btn-yellow {
+                @apply bg-warning text-white px-3 py-1.5 rounded hover:bg-warning/80 transition inline-flex items-center gap-1;
             }
-            .btn-success {
-                @apply bg-success text-white px-3 py-2 rounded hover:bg-success/80 transition-all flex items-center gap-1;
+            .input-base {
+                @apply border border-gray-300 rounded px-2 py-1;
             }
-            .btn-warning {
-                @apply bg-warning text-white px-3 py-2 rounded hover:bg-warning/80 transition-all flex items-center gap-1;
+            .textarea-base {
+                @apply border border-gray-300 rounded p-2;
             }
         }
     </style>
 </head>
 
-<body class="bg-gray-100 min-h-screen">
-    <div class="joint-app flex flex-col h-screen">
-        <!-- 顶部头部区域 -->
-        <div class="app-header panel-card m-2">
-            <div class="flex flex-wrap gap-4">
-                <!-- 左侧：逆波兰表达式输入区、文件操作 -->
-                <div class="flex-1 min-w-[400px]">
-                    <div class="flex flex-wrap gap-2 mb-3">
-                        <label class="btn-success relative overflow-hidden">
-                            <i class="fa fa-upload"></i>载入文本
-                            <input type="file" id="fileToLoad" class="absolute inset-0 opacity-0 cursor-pointer">
-                        </label>
-                        <button class="btn-primary" onclick="app.saveTextAsFile()">
-                            <i class="fa fa-download"></i>保存文本
-                        </button>
-                        <input class="border rounded px-2 py-1 flex-1 min-w-[140px]" id="inputFileNameToSaveAs" value="默认保存名称" placeholder="保存文件名">
-                    </div>
-                    <textarea id="ReversePol" class="w-full border rounded p-2 h-24 mb-3" placeholder="在此输入逆波兰逻辑表达式"></textarea>
-                    <button class="btn-warning w-full" onclick="app.parseLogic()">
-                        <i class="fa fa-cogs"></i>解析文本
-                    </button>
-                </div>
-
-                <!-- 右侧：模型JSON，文本转图 / 图转图 -->
-                <div class="flex-1 min-w-[400px]">
-                    <textarea id="myModel" class="w-full border rounded p-2 h-24 mb-3">
-{
-    nodeArray: [],
-    linkArray: []
-}
-                    </textarea>
-                    <div class="grid grid-cols-2 gap-2">
-                        <button id="LoadButton" class="btn-success w-full justify-center" onclick="app.load()">
-                            <i class="fa fa-refresh"></i>文本转图
-                        </button>
-                        <button id="SaveButton" class="btn-primary w-full justify-center" onclick="app.save()">
-                            <i class="fa fa-save"></i>图转文本
-                        </button>
-                    </div>
-                </div>
-            </div>
-            <!-- 小地图 -->
-            <div class="mini-map absolute top-4 right-4 w-40 h-28 bg-white border rounded shadow">
-                <div id="mini-paper" class="w-full h-full"></div>
+<body>
+    <!-- DOM结构完全和原版一致！！不修改元素顺序，保证原有定位生效 -->
+    <div class="joint-app">
+        <div class="app-header">
+            <div class="mini-map">
+                <div id="mini-paper"></div>
                 <div id="mini-view">
                     <div id="mini-resize"></div>
                 </div>
             </div>
-        </div>
+            <div class="title-container">
+                <div style="width:33%;float:left;overflow:auto;">
+                    <div style="margin:1px">
+                        <div class="relative overflow-hidden inline-block btn-green" style="cursor:pointer">
+                            <i class="fa fa-upload w-4"></i>
+                            <span>载入文本</span>
+                            <input type="file" style="position: absolute;
+                            top: 0;
+                            right: 0;
+                            margin: 0;
+                            padding: 0;
+                            font-size: 20px;
+                            cursor: pointer;
+                            opacity: 0;
+                            filter: alpha(opacity=0)" id="fileToLoad" />
+                        </div>
+                        <button class="btn-blue" onclick="app.saveTextAsFile()">
+                            <i class="fa fa-download w-4"></i>保存文本
+                        </button>
+                        <input class="input-base" id="inputFileNameToSaveAs" value="默认保存名称"/>
+                    </div>
 
-        <!-- 主体区域：画布 + 右侧面板 -->
-        <div class="app-body flex flex-1 gap-2 px-2 overflow-hidden">
-            <div class="left-container w-40"></div>
-            <!-- JointJS绘图画布 -->
-            <div class="main-container flex-1 panel-card overflow-hidden">
-                <div id="paper-container" class="w-full h-full">
-                    <div id="paper" class="w-full h-full" style="cursor:grab"></div>
+                    <textarea class="textarea-base w-full h-[60px]" id="ReversePol" placeholder="在此输入逆波兰逻辑表达式"></textarea>
+
+                    <button class="btn-yellow w-full mt-2" onclick="app.parseLogic()">
+                        <i class="fa fa-cogs"></i>解析文本
+                    </button>
+
+                </div>
+                <div style="width:65%;float:left">
+                    <table style="width:100%">
+                        <tr>
+                            <td colspan="2">
+                                <textarea id="myModel" class="textarea-base w-full h-[100px]">
+{
+    nodeArray: [],
+    linkArray: []
+}
+                                </textarea>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <button id="LoadButton" class="btn-green w-full justify-center" onclick="app.load()">
+                                    <i class="fa fa-refresh"></i>文本转图
+                                </button>
+                            </td>
+                            <td>
+                                <button id="SaveButton" class="btn-blue w-full justify-center" onclick="app.save()">
+                                    <i class="fa fa-save"></i>图转文本
+                                </button>
+                            </td>
+                        </tr>
+                    </table>
                 </div>
             </div>
+        </div>
 
-            <!-- 侧边编辑面板 -->
-            <div class="right-container w-72 panel-card overflow-auto">
-                <div class="mb-3">
-                    <label class="block text-gray-700 mb-1">元素名称：</label>
-                    <input class="w-full border rounded p-2" type="text" id="ERName" />
+        <div class="app-body">
+            <div class="left-container">
+
+            </div>
+            <div class="main-container">
+                <div id="paper-container">
+                    <div id="paper" style="cursor:grab">
+                    </div>
                 </div>
-                <div class="mb-3">
-                    <label class="block text-gray-700 mb-1">元素备注：</label>
-                    <textarea class="w-full border rounded p-2 h-20" id="ERMemo"></textarea>
+            </div>
+            <div id="app-resize">
+                <div style="position:absolute;left:-35px;background-image:url(assets/box-arrow-in-right.svg);background-size:100%;width:30px;height:30px;"
+                    onclick="app.ResizeBlock()">
                 </div>
-                <button id="ERSetName" class="btn-warning w-full justify-center mb-4" onclick="app.ChangeName()">
+            </div>
+            <div class="right-container">
+                <div>
+                    <div>
+                        <span>元素名称：</span>
+                        <input class="input-base w-full" type="text" id="ERName" />
+                    </div>
+                    <div class="mt-2">
+                        <span>元素备注：</span>
+                        <textarea class="textarea-base w-full" id="ERMemo">
+                    </textarea>
+                    </div>
+                </div>
+                <button id="ERSetName" class="btn-yellow w-full my-2" onclick="app.ChangeName()">
                     <i class="fa fa-pencil"></i>保存修改
                 </button>
-
-                <!-- 使用说明 -->
-                <div class="text-sm text-gray-700 bg-amber-50 p-3 rounded border border-amber-200">
-                    <p class="font-semibold mb-2">使用说明</p>
-                    <p class="mb-1">在“解析文本”上方文本框输入<span class="font-mono">逆波兰逻辑表达式</span>。</p>
-                    <p class="mb-1">支持5种逻辑操作符：</p>
-                    <ul class="list-disc pl-5 mb-2">
-                        <li><code>.</code>：<code>a b .</code> = a 与 b</li>
-                        <li><code>&lt;</code>：<code>a &lt;</code> = a 逻辑非</li>
-                        <li><code>,</code>：<code>a b ,</code> = a 或 b</li>
-                        <li><code>=</code>：<code>a b =</code> = a,b等价/同或</li>
-                        <li><code>&gt;</code>：<code>a b ></code> = a推出b</li>
-                    </ul>
-                    <p class="mb-1">示例：</p>
-                    <ul class="list-disc pl-5">
-                        <li><code>a b . fe ></code>：a与b 推出 fe</li>
-                        <li><code>a b . fe ge > =</code>：a与b等价于 fe推出ge</li>
-                    </ul>
-                    <p class="mt-2">输入后点【解析文本】生成JSON，再点【文本转图】渲染图形。</p>
+                <div class="bg-amber-50 border border-amber-200 p-2 rounded text-sm">
+                    在“解析文本”按钮上面的文本框内输入“逆波兰逻辑表达式”。<br/>
+                    “逆波兰逻辑表达式”支持五种逻辑操作符：<br/>
+                    {<br/>
+                    “.”：“a b .”代表“a”和“b”的逻辑与，<br/>
+                    “<”：“a <”代表“a”的逻辑非，<br/>
+                    “,”：“a b ,”代表“a”和“b”的逻辑或，<br/>
+                    “=”：“a b =”代表“a”和“b”的逻辑等价/同或<br/>
+                    “>”：“a b >”代表“a”和“b”的逻辑推出，<br/>
+                      }。<br/>
+                    逆波兰逻辑表达式组合的举例说明：<br/>
+                    {<br/>
+                    “a b . fe >”即代表逻辑表达“a 与 b   推出了   fe”，<br/>
+                    “a b . fe ge > =”即代表逻辑表达“a 与 b  等价于  fe 推出了 ge”<br/>
+                    }。<br/>
+                    之后点击“解析文本”按钮，将“逆波兰逻辑表达式”转换为适合图形表示的 JSON 格式，<br/>
+                    之后再点击“解析文本”按钮旁的“文本转图”，得到最终的正规图形表示。
                 </div>
             </div>
-
-            <!-- 伸缩按钮 -->
-            <div id="app-resize">
-                <div class="absolute left-[-35px] top-1/2 -translate-y-1/2 w-[30px] h-[30px] bg-[url(assets/box-arrow-in-right.svg)] bg-contain cursor-pointer" onclick="app.ResizeBlock()"></div>
+            <div class="bottom-container">
+                <p id="status">Diagram Model loaded from Json Format.</p>
             </div>
         </div>
-
-        <!-- 底部状态栏 -->
-        <div class="bottom-container panel-card m-2 py-2">
-            <p id="status" class="text-gray-700">Diagram Model loaded from Json Format.</p>
-        </div>
     </div>
-
-    <!-- 原有视图JS，位置不动 -->
-    <script src="ViewGen.js"></script>
+    <script src="ViewGen.js">
+    </script>
 </body>
+
 </html>
